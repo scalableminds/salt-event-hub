@@ -9,9 +9,12 @@ from flask import request
 
 app = Flask(__name__)
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('http')
-parser.add_argument('https')
+parser = argparse.ArgumentParser(description='This is a Salt-Hubot-Event tool')
+parser.add_argument('-f', action='store_false', default=True,
+                    dest='boolean_switch',
+                    help='Set to false if you want http')
+
+results = parser.parse_args()
 
 @app.route('/run', methods=['POST'])
 def event_listener():
@@ -37,4 +40,8 @@ if __name__ == '__main__':
     handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
-    app.run(host='0.0.0.0', debug=True, ssl_context=('/Users/new/Documents/Dev/Scalable Minds/certificates/config.crt', '/Users/new/Documents/Dev/Scalable Minds/certificates/config.key'))
+
+    if results.boolean_switch:
+        app.run(host='0.0.0.0', debug=True, ssl_context=('/Users/new/Documents/Dev/Scalable Minds/certificates/config.crt', '/Users/new/Documents/Dev/Scalable Minds/certificates/config.key'))
+    else:
+        app.run(host='0.0.0.0', debug=True)
