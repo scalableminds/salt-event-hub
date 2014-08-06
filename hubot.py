@@ -1,5 +1,6 @@
 import logging
 import argparse
+import requests
 
 from logging.handlers import RotatingFileHandler
 from flask import Flask
@@ -9,27 +10,43 @@ from flask import request
 
 app = Flask(__name__)
 
-parser = argparse.ArgumentParser(description='This is a Salt-Hubot-Event tool')
-parser.add_argument('-f', action='store_false', default=True,
+auth_data=open('auth.json')
+data = json.load(auth_data)
+auth_data.close()
+token = data['token']
+
+crt_data=open('config.json')
+data = json.load(crt_data)
+crt_data.close()
+crt = data['crt']
+crtKey = data['crtKey']
+
+parser = argparse.ArgumentParser(description='Selection between http and https')
+parser.add_argument('-http', action='store_false', default=True,
                     dest='boolean_switch',
-                    help='Set to false if you want http')
+                    help='Set flag if you want send data through http')
 
 results = parser.parse_args()
 
-@app.route('/run', methods=['POST'])
-def event_listener():
+@app.route('/<action>/trigger', methods=['POST'])
+def event_listener(action):
     from salt.utils.event import SaltEvent
 
+    authToken = request.headers['X-AUTH-TOKEN']
+
+    if authToken != token:
+        return "X-AUTH-TOKEN is wrong"
+
     content = request.get_json()
+
     data = content['data']
-    tag = content['tag']
     room = content['room']
 
     payload = { 'data' : data, 'room' : room }
 
     sock_dir = '/var/run/salt/minion'
     event = SaltEvent('master', sock_dir)
-    event.fire_event(payload, tag)
+    event.fire_event(payload, action)
 
     return "success"
 
@@ -42,6 +59,6 @@ if __name__ == '__main__':
     app.logger.addHandler(handler)
 
     if results.boolean_switch:
-        app.run(host='0.0.0.0', debug=True, ssl_context=('/Users/new/Documents/Dev/Scalable Minds/certificates/config.crt', '/Users/new/Documents/Dev/Scalable Minds/certificates/config.key'))
+        app.run(host='0.0.0.0', debug=True, ssl_context=(crt, crtKey))
     else:
         app.run(host='0.0.0.0', debug=True)
