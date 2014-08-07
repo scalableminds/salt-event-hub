@@ -47,7 +47,7 @@ def event_listener(action):
         abort(401)
 
     content = request.get_json()
-    payload = { 'data' : content['data'], 'room' : content['room'] }
+    payload = { 'data' : content['data'], 'source' : content['source'] }
 
     sock_dir = '/var/run/salt/minion'
     event = SaltEvent('master', sock_dir)
@@ -60,7 +60,7 @@ def custom_401(error):
     return Response('Wrong X-AUTH-TOKEN', 401, {'HUBOTAuthenticate':'Basic realm="Proper Token Required"'})
 
 if __name__ == '__main__':
-    host = args.host if args.host else '0.0.0.0'
+    host = args.host if args.host else 'localhost'
     port = int(args.port) if args.port else 5000
     if args.use_https:
         app.run(host=host, port=port, debug=True)
