@@ -32,9 +32,11 @@ else:
 parser = argparse.ArgumentParser(description='Selection between http and https')
 parser.add_argument('--https', action='store_false', default=True,
                     dest='use_https',
-                    help='Set flag if you want send data through https')
-
-protocol = parser.parse_args()
+                    help='Set args if you want send data through https')
+parser.add_argument('--host')
+parser.add_argument('--port')
+args = parser.parse_args()
+logger.debug(args)
 
 @app.route('/<action>/trigger', methods=['POST'])
 def event_listener(action):
@@ -58,7 +60,9 @@ def custom_401(error):
     return Response('Wrong X-AUTH-TOKEN', 401, {'HUBOTAuthenticate':'Basic realm="Proper Token Required"'})
 
 if __name__ == '__main__':
-    if protocol.use_https:
-        app.run(host='0.0.0.0', debug=True)
+    host = args.host if args.host else '0.0.0.0'
+    port = int(args.port) if args.port else 5000
+    if args.use_https:
+        app.run(host=host, port=port, debug=True)
     else:
-        app.run(host='0.0.0.0', debug=True, ssl_context=(crt, crtKey))
+        app.run(host=host, port=port, debug=True, ssl_context=(crt, crtKey))
