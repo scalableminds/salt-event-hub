@@ -11,6 +11,9 @@ from flask import Response
 
 app = Flask(__name__)
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 try:
     config_data = open('config.json')
 except IOError:
@@ -55,10 +58,6 @@ def custom_401(error):
     return Response('Wrong X-AUTH-TOKEN', 401, {'HUBOTAuthenticate':'Basic realm="Proper Token Required"'})
 
 if __name__ == '__main__':
-    handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
-    handler.setLevel(logging.INFO)
-    app.logger.addHandler(handler)
-
     if protocol.use_https:
         app.run(host='0.0.0.0', debug=True)
     else:
