@@ -1,5 +1,6 @@
 import logging
 import argparse
+import sys
 
 from logging.handlers import RotatingFileHandler
 from flask import Flask
@@ -8,16 +9,20 @@ from flask import request
 
 app = Flask(__name__)
 
-auth_data=open('auth.json')
-data = json.load(auth_data)
-auth_data.close()
-token = data['token']
-
-crt_data=open('config.json')
-data = json.load(crt_data)
-crt_data.close()
-crt = data['crt']
-crtKey = data['crtKey']
+try:
+    config_data = open('config.json')
+except IOError:
+    sys.exit("Error: can\'t find config.json")
+else:
+    try:
+        data   = json.load(config_data)
+        token  = data['token']
+        crt    = data['crt']
+        crtKey = data['crtKey']
+    except Exception:
+        sys.exit("Error: can\'t read data from config.json")
+    finally:
+        config_data.close()
 
 parser = argparse.ArgumentParser(description='Selection between http and https')
 parser.add_argument('--https', action='store_false', default=True,

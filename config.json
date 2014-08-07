@@ -1,4 +1,5 @@
 {
+  "token": "eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4NTY2OTY1NSwiaWF0IjoxMzg1NjY5MDU1fQ.eyJpZCI6MX0.XbOEFJkhjHJ5uRINh2JA1BPzXjSohKYDRT472wGOvjc",
   "crt" : "/Users/new/Documents/Dev/Scalable Minds/certificates/config.crt",
   "crtKey" : "/Users/new/Documents/Dev/Scalable Minds/certificates/config.key"
 }
