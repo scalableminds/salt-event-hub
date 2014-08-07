@@ -20,9 +20,9 @@ crt = data['crt']
 crtKey = data['crtKey']
 
 parser = argparse.ArgumentParser(description='Selection between http and https')
-parser.add_argument('-http', action='store_false', default=True,
-                    dest='boolean_switch',
-                    help='Set flag if you want send data through http')
+parser.add_argument('--https', action='store_false', default=True,
+                    dest='use_https',
+                    help='Set flag if you want send data through https')
 
 protocol = parser.parse_args()
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     handler.setLevel(logging.INFO)
     app.logger.addHandler(handler)
 
-    if protocol.boolean_switch:
-        app.run(host='0.0.0.0', debug=True, ssl_context=(crt, crtKey))
-    else:
+    if protocol.use_https:
         app.run(host='0.0.0.0', debug=True)
+    else:
+        app.run(host='0.0.0.0', debug=True, ssl_context=(crt, crtKey))
