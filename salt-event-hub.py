@@ -6,6 +6,8 @@ from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask import json
 from flask import request
+from flask import abort
+from flask import Response
 
 app = Flask(__name__)
 
@@ -37,7 +39,7 @@ def event_listener(action):
 
     authToken = request.headers['X-AUTH-TOKEN']
     if authToken != token:
-        return "X-AUTH-TOKEN is wrong"
+        abort(401)
 
     content = request.get_json()
     payload = { 'data' : content['data'], 'room' : content['room'] }
@@ -47,6 +49,10 @@ def event_listener(action):
     event.fire_event(payload, action)
 
     return "success"
+
+@app.errorhandler(401)
+def custom_401(error):
+    return Response('Wrong X-AUTH-TOKEN', 401, {'HUBOTAuthenticate':'Basic realm="Proper Token Required"'})
 
 if __name__ == '__main__':
     handler = RotatingFileHandler('foo.log', maxBytes=10000, backupCount=1)
