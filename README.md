@@ -14,7 +14,7 @@ You can test your **Salt-event-hub** by running the following.
 ## Useful commands
 * `--host` - you can set server's host (default is `localhost`)
     
-    `% python2 salt-event-hub.py --host scm.io`
+    `% python2 salt-event-hub.py --host example.io`
     
 * `--port` - you can set server's port (default is `5000`)
  
