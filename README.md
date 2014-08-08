@@ -20,7 +20,7 @@ You can test your **Salt-event-hub** by running the following.
  
    `% python2 salt-event-hub.py --port 9000`
     
-* `--https` - in case of using this option you are obligatory to set proper path to certificates and its key (see more in [Config](##config) section)
+* `--https` - in case of using this option you are obligatory to set proper path to certificates and its key (see more in [Config](#config) section)
 
 	`% python2 salt-event-hub.py --https`
 	
