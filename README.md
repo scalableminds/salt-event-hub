@@ -17,9 +17,11 @@ You can test your **Salt-event-hub** by running the following.
     `% python2 salt-event-hub.py --host scm.io`
     
 * `--port` - you can set server's port (default is `5000`)
-    `% python2 salt-event-hub.py --host 9000`
+ 
+   `% python2 salt-event-hub.py --host 9000`
     
 * `--https` - in case of using this option you are obligatory to set proper path to certificates and its key (see more in [Config]() section)
+
 	`% python2 salt-event-hub.py --https`
 	
 ## Config
@@ -38,7 +40,7 @@ Example:
 eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4NTY2OTY1NSwiaWF0IjoxMzg1NjY5MDU1fQ" \
 "Content-Type: application/json" \ 
 -d "{"source":"oxalis", "data":"xyz"}" \
--https://config.example.io:5000/install/trigger
+https://config.example.io:5000/install/trigger
 
 => 200 OK
 or
@@ -50,4 +52,4 @@ or
 scalable minds - http://scm.io
 
 ## License
-TBD
+MIT &copy; scalable minds 2014
