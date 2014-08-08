@@ -53,7 +53,7 @@ def event_listener(action):
     event = SaltEvent('master', sock_dir)
     event.fire_event(payload, action)
 
-    return "success"
+    return "OK"
 
 @app.errorhandler(401)
 def custom_401(error):
