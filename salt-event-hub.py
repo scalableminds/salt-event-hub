@@ -21,7 +21,7 @@ except IOError:
 else:
     try:
         data   = json.load(config_data)
-        token  = data['token']
+        token  = data['x_auth_token']
         crt    = data['crt']
         crtKey = data['crtKey']
     except Exception:
