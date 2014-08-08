@@ -18,7 +18,7 @@ You can test your **Salt-event-hub** by running the following.
     
 * `--port` - you can set server's port (default is `5000`)
  
-   `% python2 salt-event-hub.py --host 9000`
+   `% python2 salt-event-hub.py --port 9000`
     
 * `--https` - in case of using this option you are obligatory to set proper path to certificates and its key (see more in [Config]() section)
 
@@ -27,10 +27,18 @@ You can test your **Salt-event-hub** by running the following.
 ## Config
 In `config.json` file you can change (**WARNING - do not delete these properties**):
 
+* `x_auth_token` - this is an authentication token of server
 * `crt` - path to certificate
 * `crtKey` - path to certificate's key
-* `x_auth_token` - this is an authentication token of server
 
+```
+Exemplary config.json:
+{
+  "x_auth_token": "eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4NTY2OTY1NSwiaWF0IjoxMzg1NjY5MDU1fQ",
+  "crt" : "/path/to/config.crt",
+  "crtKey" : "/path/to/config.key"
+}
+```
 ## REST API
 ```
 POST /<action>/trigger
