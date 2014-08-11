@@ -4,7 +4,7 @@ This is a http server offering an interface to fire salt events in RESTful way.
 
 ## Install
 * You will need Python 2.6 or higher to get started, so be sure to have an up-to-date Python 2.x installation.
-* Install Flask (`pip install Flask`)
+* Install dependencies (`pip install -r requirements.txt`)
 
 ## Testing
 You can test your **Salt-event-hub** by running the following.
