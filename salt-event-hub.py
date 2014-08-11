@@ -30,11 +30,11 @@ else:
         config_data.close()
 
 parser = argparse.ArgumentParser(description='Selection between http and https')
-parser.add_argument('--https', action='store_false', default=True,
+parser.add_argument('--https', action='store_true', default=False,
                     dest='use_https',
                     help='Set args if you want send data through https')
-parser.add_argument('--host')
-parser.add_argument('--port')
+parser.add_argument('--host', default="localhost")
+parser.add_argument('--port', default=5000)
 args = parser.parse_args()
 logger.debug(args)
 
@@ -49,7 +49,7 @@ def event_listener(action):
     content = request.get_json()
     payload = { 'data' : content['data'], 'source' : content['source'] }
 
-    sock_dir = '/var/run/salt/minion'
+    sock_dir = '/var/run/salt/master'
     event = SaltEvent('master', sock_dir)
     event.fire_event(payload, action)
 
@@ -57,12 +57,10 @@ def event_listener(action):
 
 @app.errorhandler(401)
 def custom_401(error):
-    return Response('Wrong X-AUTH-TOKEN', 401, {'HUBOTAuthenticate':'Basic realm="Proper Token Required"'})
+    return Response('Wrong X-AUTH-TOKEN', 401, {'Authenticate':'Basic realm="Proper Token Required"'})
 
 if __name__ == '__main__':
-    host = args.host if args.host else 'localhost'
-    port = int(args.port) if args.port else 5000
     if args.use_https:
-        app.run(host=host, port=port, debug=True)
+        app.run(host=args.host, port=args.port, debug=True, ssl_context=(crt, crtKey))
     else:
-        app.run(host=host, port=port, debug=True, ssl_context=(crt, crtKey))
+        app.run(host=args.host, port=args.port, debug=True)
