@@ -1,6 +1,9 @@
 import logging
 import argparse
 import sys
+import os
+import atexit
+from signal import *
 
 from logging.handlers import RotatingFileHandler
 from flask import Flask
@@ -35,6 +38,7 @@ parser.add_argument('--https', action='store_true', default=False,
                     help='Set args if you want send data through https')
 parser.add_argument('--host', default="localhost")
 parser.add_argument('--port', default=5000)
+parser.add_argument('--pidfile', default="salt-event-hub.pid")
 args = parser.parse_args()
 logger.debug(args)
 
@@ -59,8 +63,35 @@ def event_listener(action):
 def custom_401(error):
     return Response('Wrong X-AUTH-TOKEN', 401, {'Authenticate':'Basic realm="Proper Token Required"'})
 
-if __name__ == '__main__':
-    if args.use_https:
-        app.run(host=args.host, port=args.port, debug=True, ssl_context=(crt, crtKey))
+def write_pid():
+    pid = str(os.getpid())
+    pidfile = args.pidfile
+
+    if os.path.isfile(pidfile):
+        print "%s already exists, exiting" % pidfile
+        sys.exit()
     else:
-        app.run(host=args.host, port=args.port, debug=True)
+        file(pidfile, 'w').write(pid)
+
+def clean_up(*args):
+    remove_pid()
+    sys.exit(0)
+
+def remove_pid():
+    pidfile = args.pidfile
+    if os.path.isfile(pidfile):
+        os.unlink(pidfile)
+
+def ensure_clean_up():
+    for sig in (SIGINT, SIGTERM):
+        signal(sig, clean_up)
+    atexit.register(remove_pid)
+
+if __name__ == '__main__':
+    write_pid()
+    ensure_clean_up()
+    if args.use_https:
+        app.run(host=args.host, port=args.port, ssl_context=(crt, crtKey))
+    else:
+        app.run(host=args.host, port=args.port)
+
