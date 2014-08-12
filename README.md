@@ -13,30 +13,30 @@ You can test your **Salt-event-hub** by running the following.
 
 ## Useful commands
 * `--host` - you can set server's host (default is `localhost`)
-    
+
     `% python2 salt-event-hub.py --host example.io`
-    
+
 * `--port` - you can set server's port (default is `5000`)
- 
+
    `% python2 salt-event-hub.py --port 9000`
-    
+
 * `--https` - in case of using this option you are obligatory to set proper path to certificates and its key (see more in [Config](#config) section)
 
 	`% python2 salt-event-hub.py --https`
-	
-## Config
-In `config.json` file you can change (**WARNING - do not delete these properties**):
 
-* `x_auth_token` - this is an authentication token of server
-* `crt` - path to certificate
-* `crtKey` - path to certificate's key
+## Config
+In `config.json` file you can set as well:
+
+* `x_auth_token` - this is an authentication token of server (**WARNING - do not delete this property**)
+* `crtPath` - path to certificate
+* `crtKeyPath` - path to certificate's key
 
 ```
 Exemplary config.json:
 {
   "x_auth_token": "eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4NTY2OTY1NSwiaWF0IjoxMzg1NjY5MDU1fQ",
-  "crt" : "/path/to/config.crt",
-  "crtKey" : "/path/to/config.key"
+  "crtPath" : "/path/to/config.crt",
+  "crtKeyPath" : "/path/to/config.key"
 }
 ```
 ## REST API
@@ -44,9 +44,9 @@ Exemplary config.json:
 POST /<action>/trigger
 Example:
 
-% curl -H "X-AUTH-TOKEN: \ 
+% curl -H "X-AUTH-TOKEN: \
 eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4NTY2OTY1NSwiaWF0IjoxMzg1NjY5MDU1fQ" \
-"Content-Type: application/json" \ 
+"Content-Type: application/json" \
 -d "{"source":"oxalis", "data":"xyz"}" \
 https://config.example.io:5000/install/trigger
 
