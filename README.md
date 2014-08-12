@@ -42,6 +42,7 @@ Exemplary config.json:
 ## REST API
 ```
 POST /<action>/trigger
+`Above method is expected data in **json format with source and data keys**.`
 Example:
 
 % curl -H "X-AUTH-TOKEN: \
