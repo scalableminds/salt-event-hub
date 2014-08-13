@@ -34,7 +34,7 @@ def event_listener(action):
     from salt.utils.event import SaltEvent
 
     authToken = request.headers['X-AUTH-TOKEN']
-    if args.use_https and authToken != readFromConfig('x_auth_token'):
+    if authToken != readFromConfig('x_auth_token'):
         abort(401)
 
     content = request.get_json()
