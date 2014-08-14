@@ -41,7 +41,7 @@ Exemplary config.json:
 ```
 ## REST API
 ```
-POST /<action>/trigger
+POST /<event>/trigger
 `Above method is expected data in **json format with source and data keys**.`
 Example:
 
