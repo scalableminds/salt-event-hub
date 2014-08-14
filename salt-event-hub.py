@@ -29,8 +29,8 @@ parser.add_argument('--pidfile', default="salt-event-hub.pid")
 args = parser.parse_args()
 logger.debug(args)
 
-@app.route('/<action>/trigger', methods=['POST'])
-def event_listener(action):
+@app.route('/<event>/trigger', methods=['POST'])
+def trigger(event):
     from salt.utils.event import SaltEvent
 
     authToken = request.headers['X-AUTH-TOKEN']
@@ -42,7 +42,7 @@ def event_listener(action):
 
     sock_dir = '/var/run/salt/master'
     event = SaltEvent('master', sock_dir)
-    event.fire_event(payload, action)
+    event.fire_event(payload, event)
 
     return "OK"
 
