@@ -33,9 +33,13 @@ logger.debug(args)
 def trigger(event):
     from salt.utils.event import SaltEvent
 
-    authToken = request.headers['X-AUTH-TOKEN']
+    try:
+      authToken = request.headers['X-AUTH-TOKEN']
+    except Exception:
+      abort(401)
+
     if authToken != readFromConfig('x_auth_token'):
-        abort(401)
+      abort(401)
 
     content = request.get_json()
     payload = { 'data' : content['data'], 'source' : content['source'] }
@@ -48,7 +52,7 @@ def trigger(event):
 
 @app.errorhandler(401)
 def custom_401(error):
-    return Response('Wrong X-AUTH-TOKEN', 401, {'Authenticate':'Basic realm="Proper Token Required"'})
+    return Response('Wrong authorization header', 401, {'Authenticate':'Basic realm="Proper Token Required"'})
 
 def write_pid():
     pid = str(os.getpid())
