@@ -41,8 +41,7 @@ def trigger(event):
     if authToken != readFromConfig('x_auth_token'):
       abort(401)
 
-    content = request.get_json()
-    payload = { 'data' : content['data'], 'source' : content['source'] }
+    payload = request.get_json()
 
     sock_dir = '/var/run/salt/master'
     event = SaltEvent('master', sock_dir)
