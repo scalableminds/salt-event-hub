@@ -19,33 +19,20 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-parser = argparse.ArgumentParser(description='Selection between http and https')
-parser.add_argument('--https', action='store_true', default=False,
-                    dest='use_https',
-                    help='Set args if you want send data through https')
-parser.add_argument('--host', default="localhost")
-parser.add_argument('--port', default=5000)
-parser.add_argument('--pidfile', default="salt-event-hub.pid")
-args = parser.parse_args()
-logger.debug(args)
-
 @app.route('/<event>/trigger', methods=['POST'])
 def trigger(event):
+    logger.info(str(opts))
     from salt.utils.event import SaltEvent
 
-    try:
-      authToken = request.headers['X-AUTH-TOKEN']
-    except Exception:
-      abort(401)
-
-    if authToken != readFromConfig('x_auth_token'):
+    authToken = request.headers.get("X-AUTH-TOKEN", "")
+    if authToken != opts['x_auth_token']:
       abort(401)
 
     payload = request.get_json()
 
     sock_dir = '/var/run/salt/master'
-    event = SaltEvent('master', sock_dir)
-    event.fire_event(payload, event)
+    event_interface = SaltEvent('master', sock_dir)
+    event_interface.fire_event(payload, event)
 
     return "OK"
 
@@ -55,11 +42,13 @@ def custom_401(error):
 
 def write_pid():
     pid = str(os.getpid())
-    pidfile = args.pidfile
+    pidfile = opts['pidfile']
 
     if os.path.isfile(pidfile):
-        print "%s already exists, exiting" % pidfile
-        sys.exit()
+        pidfile_pid = open(pidfile).readline().strip()
+        if(pid != pidfile_pid):
+            print "%s already exists with another pid, exiting (current: %s vs saved: %s)" % (pidfile, pid, pidfile_pid)
+            sys.exit()
     else:
         file(pidfile, 'w').write(pid)
 
@@ -68,37 +57,56 @@ def clean_up(*args):
     sys.exit(0)
 
 def remove_pid():
-    pidfile = args.pidfile
-    if os.path.isfile(pidfile):
-        os.unlink(pidfile)
+    if os.path.isfile(opts['pidfile']):
+        os.unlink(opts['pidfile'])
 
 def ensure_clean_up():
-    for sig in (SIGINT, SIGTERM):
+    for sig in (SIGINT, SIGTERM, SIGHUP):
         signal(sig, clean_up)
     atexit.register(remove_pid)
 
-def readFromConfig(key):
-  try:
-      config_data = open('config.json')
-  except IOError:
-      sys.exit("Error: can\'t find config.json")
-  else:
-      try:
-          data   = json.load(config_data)
-          value  = data[key]
-      except Exception:
-          sys.exit("Error: can\'t read " + key + " from config.json")
-      finally:
-          config_data.close()
-  return value
+def parseCmdLine():
+    parser = argparse.ArgumentParser(
+        description='Salt-event-hub is a RESTful http server for passing events to saltstack',
+        argument_default=argparse.SUPPRESS)
+
+    parser.add_argument('--https', action='store_true', default=False,
+                    dest='https',
+                    help='Set args if you want send data through https')
+    parser.add_argument('--host', default="localhost")
+    parser.add_argument('--port', default=5000)
+    parser.add_argument("--config", default="config.json")
+    parser.add_argument('--pidfile', default="salt-event-hub.pid")
+    parser.add_argument('--sslCrt')
+    parser.add_argument('--sslKey')
+    return parser.parse_args()
+
+def readConfig(config_file):
+    try:
+        config_data = open(config_file)
+    except IOError:
+        sys.exit("Error: can\'t find %s" % config_file)
+    else:
+        data=json.load(config_data)
+        config_data.close()
+        return data
 
 if __name__ == '__main__':
+    args = parseCmdLine()
+    cfg = readConfig(args.config)
+    global opts
+    opts = dict(cfg, **vars(args))
+
     write_pid()
     ensure_clean_up()
-    if args.use_https:
-        crtPath = readFromConfig('crtPath')
-        crtKeyPath = readFromConfig('crtKeyPath')
-        app.run(host=args.host, port=args.port, ssl_context=(crtPath, crtKeyPath))
+    if opts['https']:
+        if("sslCrt" in opts and "sslKey" in opts):
+            print opts['sslCrt']
+            print opts['sslKey']
+            app.run(host=opts['host'], port=opts['port'], ssl_context=(opts['sslCrt'], opts['sslKey']))
+        else:
+            logger.error("sslCrt and sslKey have to be defined in order to serve https")
+            sys.exit(1)
     else:
-        app.run(host=args.host, port=args.port)
+        app.run(host=opts['host'], port=opts['port'])
 
