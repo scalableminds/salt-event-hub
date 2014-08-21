@@ -29,12 +29,13 @@ def github(authToken):
     if not event:
         abort(400)
     payload = request.get_json()
+    eventTag = '/'.join(['github', payload['repository']['full_name'], event])
 
-    logger.info("Firing GitHub event " + event)
+    logger.info("Firing GitHub event " + eventTag)
 
     sock_dir = '/var/run/salt/master'
     event_interface = SaltEvent('master', sock_dir)
-    event_interface.fire_event(payload, "github/" + event)
+    event_interface.fire_event(payload, eventTag)
 
     return "OK"
 
