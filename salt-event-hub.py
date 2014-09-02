@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 
 import logging
 import argparse
@@ -18,6 +18,26 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+@app.route('/webhook/github/<authToken>', methods=['POST'])
+def github(authToken):
+    from salt.utils.event import SaltEvent
+    if authToken != opts['x_auth_token']:
+        abort(401)
+
+    event = request.headers.get("X-GitHub-Event", False)
+    if not event:
+        abort(400)
+    payload = request.get_json()
+    eventTag = '/'.join(['github', payload['repository']['full_name'], event])
+
+    logger.info("Firing GitHub event " + eventTag)
+
+    sock_dir = '/var/run/salt/master'
+    event_interface = SaltEvent('master', sock_dir)
+    event_interface.fire_event(payload, eventTag)
+
+    return "OK"
 
 @app.route('/<event>/trigger', methods=['POST'])
 def trigger(event):
@@ -109,4 +129,3 @@ if __name__ == '__main__':
             sys.exit(1)
     else:
         app.run(host=opts['host'], port=opts['port'])
-
