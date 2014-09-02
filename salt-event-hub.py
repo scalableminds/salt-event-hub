@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import logging
 import argparse
@@ -19,40 +19,42 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def trigger_event(payload, tag):
+    logger.info("Firing event " + tag)
+    
+    from salt.utils.event import SaltEvent
+    sock_dir = '/var/run/salt/master'
+    event = SaltEvent('master', sock_dir)
+    event.fire_event(payload, tag)
+
+
 @app.route('/webhook/github/<authToken>', methods=['POST'])
 def github(authToken):
-    from salt.utils.event import SaltEvent
-    if authToken != opts['x_auth_token']:
+
+    if auth_token != opts['x_auth_token']:
         abort(401)
 
     event = request.headers.get("X-GitHub-Event", False)
     if not event:
         abort(400)
     payload = request.get_json()
-    eventTag = '/'.join(['github', payload['repository']['full_name'], event])
+    event_tag = '/'.join(['github', payload['repository']['full_name'], event])
 
-    logger.info("Firing GitHub event " + eventTag)
-
-    sock_dir = '/var/run/salt/master'
-    event_interface = SaltEvent('master', sock_dir)
-    event_interface.fire_event(payload, eventTag)
+    tigger_event(payload, event_tag)
 
     return "OK"
 
-@app.route('/<event>/trigger', methods=['POST'])
-def trigger(event):
-    logger.info(str(opts))
+@app.route('/<event_tag>/trigger', methods=['POST'])
+def trigger(event_tag):
     from salt.utils.event import SaltEvent
 
-    authToken = request.headers.get("X-AUTH-TOKEN", "")
-    if authToken != opts['x_auth_token']:
+    auth_token = request.headers.get("X-AUTH-TOKEN", "")
+    if auth_token != opts['x_auth_token']:
       abort(401)
 
     payload = request.get_json()
 
-    sock_dir = '/var/run/salt/master'
-    event_interface = SaltEvent('master', sock_dir)
-    event_interface.fire_event(payload, event)
+    trigger_event(payload, event_tag)
 
     return "OK"
 
