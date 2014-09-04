@@ -37,7 +37,7 @@ def github(authToken):
     event = request.headers.get("X-GitHub-Event", False)
     if not event:
         abort(400)
-    payload = request.get_json()
+    payload = {"data": request.get_json()}
     event_tag = '/'.join(['github', payload['repository']['full_name'], event])
 
     tigger_event(payload, event_tag)
