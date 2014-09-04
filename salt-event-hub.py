@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 def trigger_event(payload, tag):
     logger.info("Firing event " + tag)
+    #because its a master event there is no data tag
+    payload = {"data": payload}
     
     from salt.utils.event import SaltEvent
     sock_dir = '/var/run/salt/master'
@@ -37,7 +39,7 @@ def github(authToken):
     event = request.headers.get("X-GitHub-Event", False)
     if not event:
         abort(400)
-    payload = {"data": request.get_json()}
+    payload = request.get_json()
     event_tag = '/'.join(['github', payload['repository']['full_name'], event])
 
     tigger_event(payload, event_tag)
