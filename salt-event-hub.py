@@ -42,7 +42,7 @@ def github(authToken):
     payload = request.get_json()
     event_tag = '/'.join(['github', payload['repository']['full_name'], event])
 
-    tigger_event(payload, event_tag)
+    trigger_event(payload, event_tag)
 
     return "OK"
 
